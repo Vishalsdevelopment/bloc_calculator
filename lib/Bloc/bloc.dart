@@ -2,16 +2,15 @@ import 'package:bloc_calculator/Bloc/event.dart';
 import 'package:bloc_calculator/Bloc/state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+enum Operator { plus, minus, multi, div }
+
 class BlocClass extends Bloc<EventClass, StateClass> {
   BlocClass() : super(InitialState()) {
     String display = '';
     double firstNum = 0;
     double secondNum = 0;
-    bool plus = false;
-    bool minus = false;
-    bool multi = false;
-    bool div = false;
     double tempNum = 0;
+    Operator? operator;
     on<SetDisplayEvent>((event, emit) {
       if (display == '0' || display == 'Error') {
         display = '';
@@ -25,7 +24,11 @@ class BlocClass extends Bloc<EventClass, StateClass> {
         }
       } else if (event.clickNo == '+/-') {
         if (display.startsWith('-')) {
-          display = display.substring(1, display.length);
+          if (display.length > 1) {
+            display = display.substring(1, display.length);
+          } else {
+            display = '0';
+          }
         } else {
           display = '-$display';
         }
@@ -37,11 +40,10 @@ class BlocClass extends Bloc<EventClass, StateClass> {
     });
     on<ClearDisplay>((event, emit) {
       display = '0';
-      firstNum = secondNum = tempNum = 0;
-      plus = false;
-      minus = false;
-      multi = false;
-      div = false;
+      if (event.command == 'Ac') {
+        firstNum = secondNum = tempNum = 0;
+        operator = null;
+      }
       emit(SetDisplayState(display: display));
     });
 
@@ -58,48 +60,57 @@ class BlocClass extends Bloc<EventClass, StateClass> {
       } else if (display == '-') {
         display = '0';
         emit(SetDisplayState(display: display));
+      } else if (event.operatorSign == '%') {
+        display = '${double.parse(display) / 100}';
+        emit(SetDisplayState(display: display));
       } else {
         try {
           tempNum = firstNum;
           firstNum = double.parse(display);
           display = '';
-          if (plus) {
+
+          if (operator == Operator.plus) {
             firstNum = tempNum + firstNum;
-          } else if (minus) {
+          } else if (operator == Operator.minus) {
             firstNum = tempNum - firstNum;
-          } else if (multi) {
+          } else if (operator == Operator.multi) {
             firstNum = tempNum * firstNum;
-          } else if (div) {
+          } else if (operator == Operator.div) {
             firstNum = tempNum / firstNum;
           }
-          plus = event.operatorSign == '+';
-          minus = event.operatorSign == '-';
-          multi = event.operatorSign == 'X';
-          div = event.operatorSign == '÷';
-          emit(OperatorState(operatorSign: event.operatorSign));
-        } on FormatException catch (_) {
-          display = 'Error';
-          emit(SetDisplayState(display: display));
+        } catch (_) {}
+        if (event.operatorSign == '+') {
+          operator = Operator.plus;
+        } else if (event.operatorSign == '-') {
+          operator = Operator.minus;
+        } else if (event.operatorSign == 'X') {
+          operator = Operator.multi;
+        } else if (event.operatorSign == '÷') {
+          operator = Operator.div;
         }
+        emit(OperatorState(operator: operator));
       }
     });
 
     on<AnswerEvent>((event, emit) {
       try {
         secondNum = double.parse(display);
-        if (plus) {
+        if (operator == Operator.plus) {
           display = (firstNum + secondNum).toString();
-        } else if (minus) {
+        } else if (operator == Operator.minus) {
           display = (firstNum - secondNum).toString();
-        } else if (multi) {
+        } else if (operator == Operator.multi) {
           display = (firstNum * secondNum).toString();
-        } else if (div) {
+        } else if (operator == Operator.div) {
           display = (firstNum / secondNum).toString();
+          if (display == 'Infinity') {
+            display = 'Error';
+          }
         }
-        if (display.endsWith('0')) {
+        if (display.endsWith('.0')) {
           display = display.substring(0, display.length - 2);
         }
-      } on FormatException catch (_) {
+      } catch (_) {
         display = 'Error';
       }
       emit(SetDisplayState(display: display));

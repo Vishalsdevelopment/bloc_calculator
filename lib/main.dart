@@ -72,8 +72,7 @@ class HomePage extends StatelessWidget {
         } else if (title == '=') {
           BlocProvider.of<BlocClass>(context).add(AnswerEvent());
         } else if (title == 'Ac' || title == 'C') {
-          BlocProvider.of<BlocClass>(context).add(ClearDisplay());
-        } else if (title == '%') {
+          BlocProvider.of<BlocClass>(context).add(ClearDisplay(command: title));
         } else {
           BlocProvider.of<BlocClass>(context)
               .add(SetDisplayEvent(clickNo: title));
@@ -147,9 +146,13 @@ class HomePage extends StatelessWidget {
             children: [
               BlocBuilder<BlocClass, StateClass>(
                 builder: (context, state) {
+                  String title = 'Ac';
+                  if (state is SetDisplayState && state.display != '0') {
+                    title = 'C';
+                  }
                   return myButton(
                       context: context,
-                      title: display != '0' ? 'C' : 'Ac',
+                      title: title,
                       textColor: Colors.black,
                       color: const Color(0xFF999999));
                 },
@@ -164,15 +167,20 @@ class HomePage extends StatelessWidget {
                 context: context,
                 title: '%',
                 textColor: Colors.black,
+                isOperator: true,
                 color: const Color(0xFF999999),
               ),
               BlocBuilder<BlocClass, StateClass>(
                 builder: (context, state) {
-                  Color bgColor = const Color(0xFFFF9500);
-                  Color textColor = const Color(0xFFFFFFFF);
-                  if (state is OperatorState && state.div) {
+                  Color bgColor;
+                  Color textColor;
+                  if (state is OperatorState &&
+                      state.operator == Operator.div) {
                     textColor = const Color(0xFFFF9500);
                     bgColor = const Color(0xFFFFFFFF);
+                  } else {
+                    bgColor = const Color(0xFFFF9500);
+                    textColor = const Color(0xFFFFFFFF);
                   }
                   return myButton(
                       context: context,
@@ -197,7 +205,8 @@ class HomePage extends StatelessWidget {
                 builder: (context, state) {
                   Color bgColor = const Color(0xFFFF9500);
                   Color textColor = const Color(0xFFFFFFFF);
-                  if (state is OperatorState && state.multi) {
+                  if (state is OperatorState &&
+                      state.operator == Operator.multi) {
                     textColor = const Color(0xFFFF9500);
                     bgColor = const Color(0xFFFFFFFF);
                   }
@@ -224,7 +233,8 @@ class HomePage extends StatelessWidget {
                 builder: (context, state) {
                   Color bgColor = const Color(0xFFFF9500);
                   Color textColor = const Color(0xFFFFFFFF);
-                  if (state is OperatorState && state.minus) {
+                  if (state is OperatorState &&
+                      state.operator == Operator.minus) {
                     textColor = const Color(0xFFFF9500);
                     bgColor = const Color(0xFFFFFFFF);
                   }
@@ -251,7 +261,8 @@ class HomePage extends StatelessWidget {
                 builder: (context, state) {
                   Color bgColor = const Color(0xFFFF9500);
                   Color textColor = const Color(0xFFFFFFFF);
-                  if (state is OperatorState && state.plus) {
+                  if (state is OperatorState &&
+                      state.operator == Operator.plus) {
                     textColor = const Color(0xFFFF9500);
                     bgColor = const Color(0xFFFFFFFF);
                   }

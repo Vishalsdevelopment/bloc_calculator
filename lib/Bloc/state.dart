@@ -1,3 +1,5 @@
+import 'package:bloc_calculator/Bloc/bloc.dart';
+
 abstract class StateClass {}
 
 class InitialState extends StateClass {}
@@ -9,15 +11,8 @@ class SetDisplayState extends StateClass {
 }
 
 class OperatorState extends StateClass {
-  bool plus = false;
-  bool minus = false;
-  bool multi = false;
-  bool div = false;
+  Operator? operator;
+  double? firstNum;
 
-  OperatorState({required String operatorSign}) {
-    plus = operatorSign == '+';
-    minus = operatorSign == '-';
-    multi = operatorSign == 'X';
-    div = operatorSign == '÷';
-  }
+  OperatorState({required this.operator, this.firstNum});
 }

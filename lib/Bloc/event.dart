@@ -6,7 +6,11 @@ class SetDisplayEvent extends EventClass {
   SetDisplayEvent({required this.clickNo});
 }
 
-class ClearDisplay extends EventClass {}
+class ClearDisplay extends EventClass {
+  String command;
+
+  ClearDisplay({required this.command});
+}
 
 class EraseDisplay extends EventClass {}
 
